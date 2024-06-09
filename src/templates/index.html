@@ -5,39 +5,30 @@
 </head>
 <body>
     <h1>Authenticate with Shopify</h1>
+    <h1>oroa-development.myshopify.com</h1>
     <form id="authForm">
         <label for="shop">Shop:</label><br>
         <input type="text" id="shop" name="shop"><br>
         <label for="code">Code:</label><br>
         <input type="text" id="code" name="code"><br><br>
         <button type="button" onclick="authenticate()">Authenticate</button>
+        <button type="button" onclick="auth()">login</button>
+
     </form>
     <p id="result"></p>
     <script>
-        function authenticate() {
-            var shop = document.getElementById('shop').value;
-            var code = document.getElementById('code').value;
 
-            fetch('/api/shopify/authenticate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({shop: shop, code: code})
-            })
-            .then(response => response.json())
-            .then(data => {
-                var result = document.getElementById('result');
-                if (data.access_token) {
-                    result.innerHTML = 'Access Token: ' + data.access_token;
-                } else {
-                    result.innerHTML = 'Error: ' + data.error;
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+
+        function auth() {
+            const shop = document.getElementById('shop').value;
+            if (!shop) {
+                document.getElementById('result').innerText = 'Shop URL is required.';
+                return;
+            }
+             window.location.href = `/app_launched?shop=${shop}`;
         }
+        
+
     </script>
 </body>
 </html>
