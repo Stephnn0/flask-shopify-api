@@ -57,6 +57,38 @@ class ShopifyStoreClient:
             logging.exception(ex)
             return None
         
+    
+    def get_shop(self) -> dict:
+        call_path = 'shop.json'
+        method = 'GET'
+        shop_response = self.authenticated_shopify_call(call_path=call_path, method=method)
+        if not shop_response:
+            return None
+        # The myshopify_domain value is the one we'll need to listen to via webhooks to determine an uninstall
+        return shop_response['shop']
+    
+    def get_products_count(self) -> dict:
+        call_path = 'products/count.json'
+        method = 'GET'
+        products_count_response = self.authenticated_shopify_call(call_path=call_path, method=method)
+        print(products_count_response, 'products_count_response')
+        if not products_count_response:
+            return None
+        return products_count_response['count']
+    
+
+    def get_all_products(self) -> dict:
+        call_path = 'products.json?limit=100'
+        method = 'GET'
+        products_response = self.authenticated_shopify_call(call_path=call_path, method=method)
+        print(products_response, 'products_count_response')
+        if not products_response:
+            return None
+        return products_response['products']
+      
+
+#  https://[mystore].myshopify.com/admin/api/2022-07/products.json?order=created_at+desc&limit=5
+
     def create_webook(self, address: str, topic: str) -> dict:
         call_path = f'webhooks.json'
         method = 'POST'

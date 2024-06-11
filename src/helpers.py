@@ -13,11 +13,11 @@ from dotenv import load_dotenv
 
 SHOPIFY_SECRET = "d7ffb1c2e529e5598b4598016d101c18"
 APP_NAME = "flask-app"
-INSTALL_REDIRECT_URL = "https://164b-104-151-91-181.ngrok-free.app/"
+INSTALL_REDIRECT_URL = "https://9f1c-104-151-91-181.ngrok-free.app/"
 
 
 def generate_post_install_redirect_url_new():
-    redirect_url = f"https://164b-104-151-91-181.ngrok-free.app/success"
+    redirect_url = f"https://9f1c-104-151-91-181.ngrok-free.app/success"
     return redirect_url
 
 def generate_post_install_redirect_url(shop: str):

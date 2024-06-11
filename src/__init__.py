@@ -7,10 +7,8 @@ import hashlib
 import hmac
 import base64
 import requests
-
 import helpers
 import json
-
 import logging
 
 
@@ -19,13 +17,70 @@ CORS(app)
 
 SHOPIFY_SECRET = "d7ffb1c2e529e5598b4598016d101c18"
 SHOPIFY_API_KEY = "14064e1bcd7c937195a529cf86851041"
-INSTALL_REDIRECT_URL = "https://164b-104-151-91-181.ngrok-free.app/api/auth"
+INSTALL_REDIRECT_URL = "https://9f1c-104-151-91-181.ngrok-free.app/api/auth"
 APP_NAME = "flask-app"
 WEBHOOK_APP_UNINSTALL_URL = ""
 NONCE = None
 ACCESS_MODE = []  
 SCOPES = ['read_products']
 ACCESS_TOKEN = ''
+
+# CREATE TABLE sessions (
+#     id SERIAL PRIMARY KEY,
+#     unique_id UUID NOT NULL,
+#     shop VARCHAR(255) NOT NULL,
+#     state VARCHAR(255) NOT NULL,
+#     access_token VARCHAR(255) NOT NULL
+# );
+
+# import psycopg2
+# import uuid
+
+# DATABASE_URL = "postgresql://username:password@localhost/dbname"  # Replace with your actual database URL
+
+# def get_db_connection():
+#     conn = psycopg2.connect(DATABASE_URL)
+#     return conn
+
+# def store_shopify_session(shop: str, state: str, access_token: str):
+#     unique_id = uuid.uuid4()
+    
+#     conn = get_db_connection()
+#     cur = conn.cursor()
+#     try:
+#         cur.execute("""
+#             INSERT INTO sessions (unique_id, shop, state, access_token)
+#             VALUES (%s, %s, %s, %s)
+#             """,
+#             (unique_id, shop, state, access_token))
+#         conn.commit()
+#     except Exception as e:
+#         conn.rollback()
+#         raise e
+#     finally:
+#         cur.close()
+#         conn.close()
+
+
+#  GET SHOPIFY STORAGE 
+
+# def fetch_shopify_session(shop: str) -> dict:
+#     conn = get_db_connection()
+#     cur = conn.cursor()
+#     try:
+#         cur.execute("SELECT shop, access_token FROM sessions WHERE shop = %s", (shop,))
+#         session = cur.fetchone()
+#         if session:
+#             return {
+#                 "shop": session[0],
+#                 "access_token": session[1]
+#             }
+#         return None
+#     except Exception as e:
+#         raise e
+#     finally:
+#         cur.close()
+#         conn.close()
 
 def generate_install_redirect_url(shop: str, scopes: List, nonce: str, access_mode: List):
     scopes_string = ','.join(scopes)
@@ -35,7 +90,7 @@ def generate_install_redirect_url(shop: str, scopes: List, nonce: str, access_mo
     return redirect_url
 
 
-
+# LINK TO START OAUTH
 @app.route('/app_launched', methods=['GET'])
 def app_launched():
         shop = request.args.get('shop')
@@ -44,11 +99,9 @@ def app_launched():
         response = redirect(redirect_url, code=302)
         response.headers.add('Access-Control-Allow-Origin', '*')  # Allow requests from any origin
         return response
-# RESPONSE NOT FOUND code , hmac , shop
-# https://2d1a-2601-589-c200-8b90-1db5-6a99-6ddf-52e1.ngrok-free.app/api/auth?code=330a8b08bfd77a5fa83aedffd62f2242&hmac=7731e9c30a94c9ae984cacaf03f2ecd8c67572d7a8f7a4cc0379466070a7b31f&host=YWRtaW4uc2hvcGlmeS5jb20vc3RvcmUvb3JvYS1kZXZlbG9wbWVudA&shop=oroa-development.myshopify.com&state=c7aa708476944bf09f96adebc68ca8f7&timestamp=1717925028
 
-# ==========================================================
 
+# SHOULD MATCH SHOPIFY REDIRECT PARTNERS LINK
 @app.route('/api/auth', methods=['GET'])
 @helpers.verify_web_call
 def app_installed():
@@ -58,6 +111,9 @@ def app_installed():
     # if state != NONCE:
     #     return "Invalid `state` received", 400
     # NONCE = None
+
+    # SAVE AND CREATE SESSION TABLE IN POSTRGRESS FOR LATER USE AND ACCESS OK TOKEN
+    # save shop, state, accesstoken,
 
     shop = request.args.get('shop')
     code = request.args.get('code')
@@ -87,6 +143,59 @@ def app_installed():
 #     logging.error(f"webhook call received {webhook_topic}:\n{json.dumps(webhook_payload, indent=4)}")
 
 #     return "OK"
+
+
+@app.route('/api/get_shop', methods=['GET'])
+def get_shop_info():
+    # Here, you should retrieve the shop and access token from a secure source.
+    # For this example, let's assume you have them globally available.
+    shop = 'oroa-development.myshopify.com'  # Replace with your actual shop domain
+    access_token = 'shpua_ef591e962fce21d114147cc8ac6480f6'  # Replace with the actual access token
+
+    shopify_client = ShopifyStoreClient(shop=shop, access_token=access_token)
+    shop_info = shopify_client.get_shop()
+
+    if shop_info is None:
+        return jsonify({"error": "Failed to retrieve shop information"}), 500
+
+    return jsonify(shop_info)
+
+
+@app.route('/api/products_count', methods=['GET'])
+def get_products_count():
+
+    # session = fetch_shopify_session(shop)
+
+    # if not session:
+    #     return jsonify({"error": "Failed to retrieve session information"}), 500
+
+    # shopify_client = ShopifyStoreClient(shop=session['shop'], access_token=session['access_token'])
+
+    shop = 'oroa-development.myshopify.com' 
+    access_token = 'shpua_ef591e962fce21d114147cc8ac6480f6' 
+
+    shopify_client = ShopifyStoreClient(shop=shop, access_token=access_token)
+    shop_info = shopify_client.get_products_count()
+
+    if shop_info is None:
+        return jsonify({"error": "Failed to retrieve shop information"}), 500
+
+    return jsonify(shop_info)
+
+
+@app.route('/api/all_products', methods=['GET'])
+def get_all_products():
+
+    shop = 'oroa-development.myshopify.com' 
+    access_token = 'shpua_ef591e962fce21d114147cc8ac6480f6' 
+
+    shopify_client = ShopifyStoreClient(shop=shop, access_token=access_token)
+    shop_info = shopify_client.get_all_products()
+
+    if shop_info is None:
+        return jsonify({"error": "Failed to retrieve shop information"}), 500
+
+    return jsonify(shop_info)
 
 
 

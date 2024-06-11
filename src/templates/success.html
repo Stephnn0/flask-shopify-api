@@ -6,6 +6,73 @@
 <body>
     <h1>Sucess</h1>
 
+    <h1>================ GET SHOP ===================================</h1>
+    <button onclick="testGetShop()">Test Get Shop</button>
+    <pre id="result"></pre>
+
+
+    <h1>================ GET PRODUCTS COUNT ===================================</h1>
+    <button onclick="testProductsCount()">Test Products Count</button>
+    <pre id="result_2"></pre>
+
+
+    <h1>================ GET ALL PRODUCTS ===================================</h1>
+    <button onclick="testGetProducts()">Test All Products</button>
+    <pre id="result_3"></pre>
+
+
+    <script>
+        async function testGetShop() {
+            const url = '/api/get_shop';
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = `Error: ${error.message}`;
+            }
+        }
+
+
+        async function testProductsCount() {
+            const url = '/api/products_count';
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                document.getElementById('result_2').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result_2').textContent = `Error: ${error.message}`;
+            }
+        }
+
+
+        async function testGetProducts() {
+            const url = '/api/all_products';
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                document.getElementById('result_3').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result_3').textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+
 
 </body>
 </html>
