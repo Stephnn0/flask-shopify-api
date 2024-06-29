@@ -17,7 +17,7 @@ CORS(app)
 
 SHOPIFY_SECRET = "d7ffb1c2e529e5598b4598016d101c18"
 SHOPIFY_API_KEY = "14064e1bcd7c937195a529cf86851041"
-INSTALL_REDIRECT_URL = "https://9f1c-104-151-91-181.ngrok-free.app/api/auth"
+INSTALL_REDIRECT_URL = "https://a599-95-19-6-118.ngrok-free.app/api/auth"
 APP_NAME = "flask-app"
 WEBHOOK_APP_UNINSTALL_URL = ""
 NONCE = None
@@ -122,27 +122,36 @@ def app_installed():
     print(ACCESS_TOKEN, 'ACCESS_TOKEN')
 
     shopify_client = ShopifyStoreClient(shop=shop, access_token=ACCESS_TOKEN)
-    # shopify_client.create_webook(address=WEBHOOK_APP_UNINSTALL_URL, topic="app/uninstalled")
+    shopify_client.create_webook(address=WEBHOOK_APP_UNINSTALL_URL, topic="app/uninstalled")
 
     # redirect_url = helpers.generate_post_install_redirect_url(shop=shop)
     redirect_url = helpers.generate_post_install_redirect_url_new()
 
     return redirect(redirect_url, code=302)
 
-# @app.route('/app_uninstalled', methods=['POST'])
-# @helpers.verify_webhook_call
-# def app_uninstalled():
-#     # https://shopify.dev/docs/admin-api/rest/reference/events/webhook?api[version]=2020-04
-#     # Someone uninstalled your app, clean up anything you need to
-#     # NOTE the shop ACCESS_TOKEN is now void!
-#     global ACCESS_TOKEN
-#     ACCESS_TOKEN = None
+@app.route('/app_uninstalled', methods=['POST'])
+@helpers.verify_webhook_call
+def app_uninstalled():
+    print("-------------webhook hit---------------")
+    # https://shopify.dev/docs/admin-api/rest/reference/events/webhook?api[version]=2020-04
+    # Someone uninstalled your app, clean up anything you need to
+    # NOTE the shop ACCESS_TOKEN is now void!
+    # global ACCESS_TOKEN
+    # ACCESS_TOKEN = None
 
-#     webhook_topic = request.headers.get('X-Shopify-Topic')
-#     webhook_payload = request.get_json()
-#     logging.error(f"webhook call received {webhook_topic}:\n{json.dumps(webhook_payload, indent=4)}")
+    webhook_topic = request.headers.get('X-Shopify-Topic')
+    webhook_payload = request.get_json()
+    # logging.error(f"webhook call received {webhook_topic}:\n{json.dumps(webhook_payload, indent=4)}")
+    return "OK"
 
-#     return "OK"
+
+@app.route('/data_removal_request', methods=['POST'])
+@helpers.verify_webhook_call
+def data_removal_request():
+    # https://shopify.dev/tutorials/add-gdpr-webhooks-to-your-app
+    # Clear all personal information you may have stored about the specified shop
+    return "OK"
+
 
 
 @app.route('/api/get_shop', methods=['GET'])

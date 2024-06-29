@@ -9,15 +9,15 @@ import base64
 import hashlib
 from flask import request, abort
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 SHOPIFY_SECRET = "d7ffb1c2e529e5598b4598016d101c18"
 APP_NAME = "flask-app"
-INSTALL_REDIRECT_URL = "https://9f1c-104-151-91-181.ngrok-free.app/"
+INSTALL_REDIRECT_URL = "https://a599-95-19-6-118.ngrok-free.app/"
 
 
 def generate_post_install_redirect_url_new():
-    redirect_url = f"https://9f1c-104-151-91-181.ngrok-free.app/success"
+    redirect_url = f"https://a599-95-19-6-118.ngrok-free.app/success"
     return redirect_url
 
 def generate_post_install_redirect_url(shop: str):
@@ -49,6 +49,20 @@ def verify_hmac(data: bytes, orig_hmac: str):
         hashlib.sha256
     )
     return new_hmac.hexdigest() == orig_hmac
+
+
+def verify_webhook_call(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs) -> bool:
+        encoded_hmac = request.headers.get('X-Shopify-Hmac-Sha256')
+        hmac = base64.b64decode(encoded_hmac).hex()
+
+        data = request.get_data()
+        if not verify_hmac(data, hmac):
+            logging.error(f"HMAC could not be verified: \n\thmac {hmac}\n\tdata {data}")
+            abort(401)
+        return f(*args, **kwargs)
+    return wrapper
 
 
 def is_valid_shop(shop: str) -> bool:
